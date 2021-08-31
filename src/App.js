@@ -36,13 +36,16 @@ class App extends Component {
       method: "post",
       url: "/add",
       data: {
-        name: this.state.name,
+        _id: this.state.name,
         price: this.state.price,
       },
     }).then((response) => {
-      this.setState({ message: response.data.message });
-      console.log(response.data.success);
-      this.getProducts();
+      if (response.data.success){
+        this.getProducts()
+      }
+      else{
+        this.setState({message: response.data.err})
+      }
     });
   };
 
