@@ -1,36 +1,83 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import "./App.css";
+import ProductTable from "./ProductTable";
+import "./bootstrap/css/bootstrap.min.css";
+const axios = require("axios");
 
 class App extends Component {
-state = {
-    data: null
+  state = {
+    productsList: [],
+    name: "",
+    price: null,
+    message: "",
+  };
+  componentDidMount() {
+    this.getProducts();
+  }
+
+  getProducts = () => {
+    axios({
+      method: "get",
+      url: "/products",
+    }).then((response) => {
+      this.setState({ productsList: response.data.products });
+    });
+  };
+  handleName = (event) => {
+    this.setState({ name: event.target.value });
   };
 
-  componentDidMount() {
-    this.callBackendAPI()
-      .then(res => this.setState({ data: res.express }))
-      .catch(err => console.log(err));
-  }
-    // fetching the GET route from the Express server which matches the GET route from server.js
-  callBackendAPI = async () => {
-    const response = await fetch('/express_backend');
-    const body = await response.json();
+  handlePrice = (event) => {
+    this.setState({ price: event.target.value });
+  };
 
-    if (response.status !== 200) {
-      throw Error(body.message) 
-    }
-    return body;
+  handleSubmit = () => {
+    axios({
+      method: "post",
+      url: "/add",
+      data: {
+        name: this.state.name,
+        price: this.state.price,
+      },
+    }).then((response) => {
+      this.setState({ message: response.data.message });
+      console.log(response.data.success);
+      this.getProducts();
+    });
   };
 
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">{this.state.data}</p>
+      <div className="container-fluid">
+        <div>
+          <ProductTable productsList={this.state.productsList} />
+          <form className="col ">
+            <div className="row">
+              <div className="col">
+                <label>Name: </label>
+                <input
+                  type="text"
+                  onChange={(e) => this.handleName(e)}
+                  value={this.state.name}
+                ></input>
+              </div>
+              <div className="col">
+                <label>Price: </label>
+                <input
+                  type="number"
+                  onChange={(e) => this.handlePrice(e)}
+                  value={this.state.price}
+                ></input>
+              </div>
+              <button className="col" type="button" onClick={this.handleSubmit}>
+                Add
+              </button>
+            </div>
+            <div className="row">
+              <div className="col text-danger">{this.state.message}</div>
+            </div>
+          </form>
+        </div>
       </div>
     );
   }
